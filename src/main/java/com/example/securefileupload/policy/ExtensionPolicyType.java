@@ -1,3 +1,3 @@
 package com.example.securefileupload.policy;
 
-public enum ExtensionPolicyType { FIXED, CUSTOM }
+public enum ExtensionPolicyType {FIXED, CUSTOM}
