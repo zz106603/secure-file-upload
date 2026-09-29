@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "file_extension_policy")
 public class FileExtensionPolicy {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "extension", nullable = false, unique = true, length = 20)
     private String extension;
@@ -15,13 +16,32 @@ public class FileExtensionPolicy {
     @Column(nullable = false)
     private boolean blocked;
 
-    protected FileExtensionPolicy() { }
-    public FileExtensionPolicy(String extension, ExtensionPolicyType policyType, boolean blocked) {
-        this.extension = extension; this.policyType = policyType; this.blocked = blocked;
+    protected FileExtensionPolicy() {
     }
-    public Long getId() { return id; }
-    public String getExtension() { return extension; }
-    public ExtensionPolicyType getPolicyType() { return policyType; }
-    public boolean isBlocked() { return blocked; }
-    public void changeBlocked(boolean blocked) { this.blocked = blocked; }
+
+    public FileExtensionPolicy(String extension, ExtensionPolicyType policyType, boolean blocked) {
+        this.extension = extension;
+        this.policyType = policyType;
+        this.blocked = blocked;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public ExtensionPolicyType getPolicyType() {
+        return policyType;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void changeBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
 }

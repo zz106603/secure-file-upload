@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileUploadController {
     private final FileUploadService service;
 
-    public FileUploadController(FileUploadService service) { this.service = service; }
+    public FileUploadController(FileUploadService service) {
+        this.service = service;
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

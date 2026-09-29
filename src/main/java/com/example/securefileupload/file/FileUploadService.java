@@ -2,11 +2,13 @@ package com.example.securefileupload.file;
 
 import com.example.securefileupload.common.ApiException;
 import com.example.securefileupload.policy.FileExtensionPolicyRepository;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,10 @@ public class FileUploadService {
                 Files.copy(inputStream, destination);
             }
         } catch (IOException | SecurityException e) {
-            try { Files.deleteIfExists(destination); } catch (IOException | SecurityException ignored) { }
+            try {
+                Files.deleteIfExists(destination);
+            } catch (IOException | SecurityException ignored) {
+            }
             log.error("File storage failed: extension={}, size={}", extension, file.getSize(), e);
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 저장하지 못했습니다.");
         }
@@ -71,8 +76,14 @@ public class FileUploadService {
             log.warn("File upload validation failed: reason=missing_extension_or_dotfile");
             throw new ApiException(HttpStatus.BAD_REQUEST, "확장자가 없는 파일 또는 dotfile은 업로드할 수 없습니다.");
         }
-        return filename.substring(lastDot + 1).toLowerCase(Locale.ROOT);
+        String extension = filename.substring(lastDot + 1).trim().toLowerCase(Locale.ROOT);
+        if (!extension.matches("^[a-z0-9]{1,20}$")) {
+            log.warn("File upload validation failed: reason=invalid_extension");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "파일 확장자는 영문 소문자와 숫자로 된 1~20자여야 합니다.");
+        }
+        return extension;
     }
 
-    public record UploadResponse(String storedFileName, String extension, long size) { }
+    public record UploadResponse(String storedFileName, String extension, long size) {
+    }
 }
