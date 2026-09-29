@@ -17,5 +17,6 @@ app:
   upload:
     directory: ${UPLOAD_DIRECTORY:./uploads}
 server:
+  port: ${PORT:8080}
   error:
     include-message: never
