@@ -21,6 +21,7 @@ class ExtensionPolicyServiceTest {
         when(repository.saveAndFlush(any())).thenAnswer(i -> i.getArgument(0));
         FileExtensionPolicy saved = service.addCustom("  .ExE2 ");
         assertThat(saved.getExtension()).isEqualTo("exe2");
+        assertThat(saved.isBlocked()).isTrue();
     }
 
     @Test void fixedExtensionCannotBeAddedAsCustom() {
