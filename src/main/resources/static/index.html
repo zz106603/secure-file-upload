@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>파일 확장자 차단</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <p class="eyebrow">FILE POLICY</p>
+      <h1>파일 확장자 차단</h1>
+      <p>파일 확장자에 따라 특정 형식의 파일을 첨부하거나 전송하지 못하도록 제한합니다.</p>
+    </header>
+
+    <section class="panel" aria-labelledby="policy-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-number">01</p>
+          <h2 id="policy-title">확장자 차단 정책</h2>
+        </div>
+        <p class="hint">변경 사항은 서버에 저장된 후 반영됩니다.</p>
+      </div>
+
+      <div class="policy-row">
+        <h3>고정 확장자</h3>
+        <div id="fixed-extensions" class="fixed-extensions" aria-live="polite"></div>
+        <p id="fixed-message" class="message" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="policy-row custom-row">
+        <div class="custom-heading">
+          <h3>커스텀 확장자</h3>
+          <p id="custom-count" class="count">0/200</p>
+        </div>
+        <form id="custom-form" class="custom-form">
+          <label class="sr-only" for="custom-extension">커스텀 확장자</label>
+          <input id="custom-extension" name="extension" type="text" maxlength="20" placeholder="확장자 입력" autocomplete="off">
+          <button id="add-custom-button" class="button button-dark" type="submit">+ 추가</button>
+        </form>
+        <p id="custom-message" class="message" role="status" aria-live="polite"></p>
+        <div id="custom-extensions" class="tag-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="upload-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-number">02</p>
+          <h2 id="upload-title">파일 업로드</h2>
+        </div>
+        <p class="hint">파일당 최대 10MB · 단일 파일</p>
+      </div>
+      <form id="upload-form" class="upload-form">
+        <label class="file-picker" for="upload-file">
+          <span>파일 선택</span>
+          <input id="upload-file" name="file" type="file">
+        </label>
+        <button id="upload-button" class="button button-primary" type="submit">업로드</button>
+      </form>
+      <p id="upload-message" class="message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+</body>
+</html>
