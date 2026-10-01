@@ -211,6 +211,8 @@ CREATE TABLE file_extension_policy (
 );
 ```
 
+`UNIQUE(extension)` 제약으로 PostgreSQL의 고유 인덱스가 생성됩니다. 정책 데이터가 최대 약 207건이므로 조회 성능을 위한 별도의 추가 인덱스는 두지 않았습니다.
+
 초기 고정 확장자는 다음과 같습니다.
 
 ```text
