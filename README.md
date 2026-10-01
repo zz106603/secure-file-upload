@@ -2,13 +2,14 @@
 
 파일 확장자 차단 정책을 관리하고, 설정된 정책을 실제 파일 업로드 과정에서 서버 측에서 적용하는 웹 애플리케이션입니다.
 
-단순한 확장자 관리 화면 구현에 그치지 않고 파일 업로드의 검증/보안, 정책/데이터, UX/예외, 운영 관점에서 발생할 수 있는 문제를 함께 검토했습니다.
+단순한 확장자 관리 기능에 그치지 않고 파일 업로드의 검증/보안, 정책/데이터, UX/예외, 운영 관점에서 발생할 수 있는 문제를 함께 검토했습니다.
 
-## Demo
+## Links
 
-배포 URL: `https://secure-file-upload-1zsm.onrender.com`
+- GitHub: `https://github.com/zz106603/secure-file-upload`
+- Demo: `https://secure-file-upload-1zsm.onrender.com`
 
-무료 배포 환경 특성상 일정 시간 요청이 없으면 첫 접속 시 서버 시작에 시간이 걸릴 수 있습니다.
+> Render 무료 배포 환경 특성상 일정 시간 요청이 없으면 첫 접속 시 서버 시작에 시간이 걸릴 수 있습니다.
 
 ---
 
@@ -18,14 +19,15 @@
 - 커스텀 확장자 추가 / 삭제
 - 커스텀 확장자 최대 20자, 최대 200개 제한
 - Fixed / Custom 및 Custom 간 중복 방지
-- DB에 확장자 정책 영속화
-- 실제 파일 업로드 시 서버에서 DB 정책 검증
+- 확장자 정책 DB 영속화
+- 실제 업로드 시 서버에서 현재 DB 정책 검증
 - 대소문자 및 이중 확장자 처리
 - 확장자 없는 파일, Dotfile, 빈 파일 거부
+- 한 요청당 파일 1개 제한
 - 단일 파일 최대 10MB 제한
 - UUID 기반 저장 파일명 사용
 - 업로드 파일을 webroot 외부에 저장
-- 정책/네트워크/업로드 실패에 대한 사용자 오류 메시지 제공
+- 정책 오류 / 네트워크 오류 / 업로드 실패에 대한 사용자 메시지 제공
 
 ---
 
@@ -46,13 +48,16 @@
 
 # 실행 방법
 
-## Docker Compose 사용
+## 1. Docker Compose 실행
 
 가장 간단한 실행 방법입니다.
 
 ### 요구 환경
 
-Docker와 Docker Compose가 필요합니다.
+- Docker
+- Docker Compose
+
+로컬에 Java나 PostgreSQL을 별도로 설치하지 않아도 됩니다.
 
 ### 실행
 
@@ -62,9 +67,19 @@ Docker와 Docker Compose가 필요합니다.
 docker compose up --build
 ```
 
-PostgreSQL과 Spring Boot가 함께 실행되며 Flyway가 데이터베이스 schema와 초기 고정 확장자 데이터를 자동으로 생성합니다.
+Docker Compose가 다음 환경을 함께 실행합니다.
 
-실행 후 브라우저에서 다음 주소로 접속합니다.
+```text
+PostgreSQL
+    ↓
+Spring Boot
+    ↓
+Flyway Migration
+    ↓
+초기 고정 확장자 데이터 생성
+```
+
+실행 후 다음 주소로 접속합니다.
 
 ```text
 http://localhost:8080
@@ -76,7 +91,7 @@ http://localhost:8080
 docker compose down
 ```
 
-DB 데이터까지 초기화하려면 다음 명령어를 사용합니다.
+PostgreSQL volume까지 삭제해 DB를 초기화하려면 다음 명령어를 사용합니다.
 
 ```bash
 docker compose down -v
@@ -84,56 +99,66 @@ docker compose down -v
 
 ---
 
-## Java / PostgreSQL 직접 실행
+## 2. Java / PostgreSQL 직접 실행
 
-Docker를 사용하지 않는 경우 Java 21과 PostgreSQL이 필요합니다.
+Docker를 사용하지 않는 경우 다음 환경이 필요합니다.
 
-PostgreSQL에 다음 데이터베이스를 생성합니다.
+- Java 21
+- PostgreSQL
+
+PostgreSQL에 다음 DB를 생성합니다.
 
 ```text
 secure_file_upload
 ```
 
-다음 환경변수를 설정합니다.
+### Windows PowerShell
 
-```text
-DATABASE_URL=jdbc:postgresql://localhost:5432/secure_file_upload
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=postgres
-UPLOAD_DIRECTORY=./uploads
-```
+```powershell
+$env:DATABASE_URL="jdbc:postgresql://localhost:5432/secure_file_upload"
+$env:DATABASE_USERNAME="postgres"
+$env:DATABASE_PASSWORD="postgres"
+$env:UPLOAD_DIRECTORY="./uploads"
 
-Windows:
-
-```bash
 .\gradlew.bat bootRun
 ```
 
-macOS / Linux:
+### macOS / Linux
 
 ```bash
+export DATABASE_URL="jdbc:postgresql://localhost:5432/secure_file_upload"
+export DATABASE_USERNAME="postgres"
+export DATABASE_PASSWORD="postgres"
+export UPLOAD_DIRECTORY="./uploads"
+
 ./gradlew bootRun
 ```
 
-Flyway가 애플리케이션 시작 시 필요한 table과 초기 데이터를 자동으로 생성합니다.
+애플리케이션 시작 시 Flyway가 필요한 테이블과 초기 데이터를 자동으로 생성합니다.
+
+실행 후 다음 주소로 접속합니다.
+
+```text
+http://localhost:8080
+```
 
 ---
 
 # 테스트
 
-Windows:
+### Windows
 
 ```bash
 .\gradlew.bat test
 ```
 
-macOS / Linux:
+### macOS / Linux
 
 ```bash
 ./gradlew test
 ```
 
-파일 업로드는 자동 테스트 외에도 다음과 같은 Edge Case를 브라우저에서 직접 확인했습니다.
+자동 테스트 외에도 실제 브라우저 업로드를 통해 다음 Edge Case를 확인했습니다.
 
 ```text
 allowed.txt
@@ -145,10 +170,22 @@ README
 .env
 .config.json
 empty.txt
-잘못된 확장자 형식
-10MiB 파일
-10MiB 초과 파일
+bad.ab-c
+20자를 초과하는 확장자
+exact-10MiB.txt
+over-10MiB.txt
 ```
+
+주요 확인 항목:
+
+- 대소문자 정규화
+- 마지막 확장자 기준 처리
+- 확장자 없는 파일 / Dotfile 거부
+- 빈 파일 거부
+- 잘못된 확장자 형식 거부
+- 정책 변경 후 실제 업로드 반영
+- 정확히 10MiB 파일 성공
+- 10MiB 초과 파일 실패
 
 ---
 
@@ -174,7 +211,7 @@ CREATE TABLE file_extension_policy (
 );
 ```
 
-초기 고정 확장자는 Flyway migration에서 생성합니다.
+초기 고정 확장자는 다음과 같습니다.
 
 ```text
 bat
@@ -188,7 +225,7 @@ js
 
 모든 고정 확장자의 최초 `blocked` 상태는 `false`입니다.
 
-실제 migration은 다음 파일에서 확인할 수 있습니다.
+실제 Schema와 제약조건은 Flyway migration으로 관리합니다.
 
 ```text
 src/main/resources/db/migration/
@@ -255,29 +292,41 @@ Content-Type: multipart/form-data
 
 업로드된 파일은 원본 파일명을 실제 저장 파일명으로 사용하지 않고 UUID 기반 이름으로 저장합니다.
 
-기본 저장 위치는 다음과 같습니다.
+기본 로컬 저장 위치:
 
 ```text
 ./uploads
 ```
 
-Spring 정적 리소스 디렉터리와 분리되어 있으며 업로드된 파일을 웹에서 직접 제공하지 않습니다.
+저장 디렉터리는 Spring 정적 리소스 경로와 분리되어 있으며 업로드된 파일을 웹에서 직접 제공하지 않습니다.
 
 Render 배포 환경의 로컬 파일 시스템은 장기 보관 용도로 사용하지 않습니다. 재시작 또는 재배포 시 업로드된 파일이 유지되지 않을 수 있습니다.
 
-현재 과제에는 파일 장기 보관이나 다운로드 요구사항이 없어 Object Storage는 사용하지 않았습니다. 관련 운영 고려사항은 `CONSIDERATIONS.md`에 정리했습니다.
+현재 과제에는 파일 장기 보관이나 다운로드 요구사항이 없어 Object Storage는 사용하지 않았습니다.
+
+저장공간, 파일 lifecycle, Object Storage 도입 시 정합성 등 운영 관련 판단은 `CONSIDERATIONS.md`에 정리했습니다.
 
 ---
 
-# 문서
+# 설계 / AI 활용 문서
 
-파일 업로드 기능을 구현하면서 검토한 보안, 데이터, UX, 운영상의 판단은 다음 문서에 정리했습니다.
+## CONSIDERATIONS.md
+
+파일 업로드 기능을 구현하면서 검토한 다음 관점의 판단과 근거를 정리했습니다.
+
+- 검증 / 보안
+- 정책 / 데이터
+- UX / 예외
+- 운영
+- 과제 외에 추가로 발견한 고려사항
 
 ```text
 CONSIDERATIONS.md
 ```
 
-AI를 이용해 문제를 분해하고 구현 범위를 결정한 과정, 실제 사용한 프롬프트와 검증 과정은 다음 문서에 정리했습니다.
+## PROMPT_LOG.md
+
+AI를 이용해 문제를 분해하고 구현 범위를 결정한 과정과 실제 사용한 프롬프트, 재질문, 검증 과정을 정리했습니다.
 
 ```text
 PROMPT_LOG.md
