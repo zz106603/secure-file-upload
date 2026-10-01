@@ -1,6 +1,7 @@
 package com.example.securefileupload.policy;
 
 import com.example.securefileupload.common.ApiException;
+import com.example.securefileupload.common.ExtensionFormat;
 
 import java.util.List;
 
@@ -42,11 +43,12 @@ public class ExtensionPolicyService {
     @Transactional
     public FileExtensionPolicy addCustom(String rawExtension) {
         String extension = normalize(rawExtension);
-        if (!extension.matches("^[a-z0-9]{1,20}$"))
+        if (!ExtensionFormat.isValid(extension))
             throw new ApiException(HttpStatus.BAD_REQUEST, "확장자는 영문 소문자와 숫자로 된 1~20자여야 합니다.");
         if (repository.existsByExtension(extension)) throw new ApiException(HttpStatus.CONFLICT, "이미 등록된 확장자입니다.");
         if (repository.countByPolicyType(ExtensionPolicyType.CUSTOM) >= MAX_CUSTOM_COUNT)
             throw new ApiException(HttpStatus.CONFLICT, "커스텀 확장자는 최대 200개까지 등록할 수 있습니다.");
+        // 사전 조회로 사용자 오류를 안내하고, 동시 중복 요청은 DB UNIQUE 제약으로 최종 차단한다.
         try {
             FileExtensionPolicy policy = repository.saveAndFlush(new FileExtensionPolicy(extension, ExtensionPolicyType.CUSTOM, true));
             log.info("Custom extension policy added: extension={}", extension);

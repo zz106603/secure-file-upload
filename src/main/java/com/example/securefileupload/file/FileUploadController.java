@@ -20,6 +20,7 @@ public class FileUploadController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     FileUploadService.UploadResponse upload(MultipartHttpServletRequest request) {
+        // file 필드만 확인하면 다른 이름으로 첨부된 추가 파일을 놓치므로 요청 전체를 센다.
         List<MultipartFile> files = request.getMultiFileMap()
                 .values()
                 .stream()
