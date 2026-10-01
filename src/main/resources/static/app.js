@@ -68,6 +68,8 @@ function renderFixedPolicies() {
 
 async function changeFixedPolicy(policy, checkbox) {
   const requestedBlocked = checkbox.checked;
+  // 서버 저장 전에는 기존 체크 상태를 유지해 실패 시 화면과 DB가 어긋나지 않게 한다.
+  checkbox.checked = policy.blocked;
   checkbox.disabled = true;
   try {
     const saved = await request(`/api/extension-policies/fixed/${policy.id}`, {
@@ -128,6 +130,7 @@ customForm.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ extension: customInput.value })
     });
+    // 서버가 저장에 성공한 응답을 받은 뒤에만 목록과 개수를 바꾼다.
     customInput.value = "";
     customPolicies = [...customPolicies, saved].sort((left, right) => left.extension.localeCompare(right.extension));
     renderCustomPolicies();
